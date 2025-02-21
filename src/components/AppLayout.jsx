@@ -1,15 +1,14 @@
 import React from "react";
 import Header from "./Header";
-import Main from "./Main";
 import Sidebar from "./Sidebar";
 
-export default function AppLayout() {
+export default function AppLayout({ children }) {
   return (
-    <div className="min-h-screen flex">
+    <div className="flex min-h-screen">
       <Sidebar />
-      <div className="flex-1 flex flex-col">
+      <div className="flex flex-1 flex-col">
         <Header />
-        <Main />
+        <main className="flex-1 bg-gray-50 p-6">{children}</main>
       </div>
     </div>
   );
