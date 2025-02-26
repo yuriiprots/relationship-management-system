@@ -1,28 +1,25 @@
 import React from "react";
+import { AuthProvider } from "./contexts/authContext";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-
-import AppLayout from "./components/AppLayout";
-import Dashboard from "./pages/Dashboard";
-import People from "./pages/People";
-import Interactions from "./pages/Interactions";
-import Settings from "./pages/Settings";
+import AppRouter from "./components/AppRouter";
 
 function App() {
   return (
     <>
-      <ToastContainer position="top-center" autoClose={3000} />
-      <Router>
-        <AppLayout>
-          <Routes>
+      <AuthProvider>
+        <ToastContainer position="top-center" autoClose={3000} />
+        <Router>
+          {/* <Routes>
             <Route path="/" element={<Dashboard />} />
             <Route path="/interactions" element={<Interactions />} />
             <Route path="/people" element={<People />} />
             <Route path="/settings" element={<Settings />} />
-          </Routes>
-        </AppLayout>
-      </Router>
+          </Routes> */}
+          <AppRouter />
+        </Router>
+      </AuthProvider>
     </>
   );
 }

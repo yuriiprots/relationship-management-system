@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { toast } from "react-toastify";
 import InteractionForm from "../components/InteractionForm";
 import InteractionTable from "../components/InteractionTable";
 import {
@@ -7,23 +8,27 @@ import {
   updateInteractionInFirestore,
   deleteInteractionInFirestore,
 } from "../firebase/firestoreOperations";
-import { toast } from "react-toastify";
 
 export default function Main() {
   const [showForm, setShowForm] = useState(false);
   const [interactionsData, setInteractionsData] = useState([]);
   const [editingInteraction, setEditingInteraction] = useState(null);
+  const [isLoading, setIsLoading] = useState(true);
+
+  const loadInteractions = async () => {
+    setIsLoading(true);
+    try {
+      const interactions = await fetchInteractionsFromFirestore();
+      setInteractionsData(interactions);
+      // toast.success("Interactions loaded successfully");
+    } catch (error) {
+      toast.error(`Failed to load interactions: ${error}`);
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   useEffect(() => {
-    const loadInteractions = async () => {
-      try {
-        const interactions = await fetchInteractionsFromFirestore();
-        setInteractionsData(interactions);
-      } catch (error) {
-        toast.error(`Failed to load interactions: ${error}`);
-      }
-    };
-
     loadInteractions();
   }, []);
 
@@ -120,6 +125,8 @@ export default function Main() {
         interactionsData={interactionsData}
         editInteraction={editInteraction}
         deleteInteraction={handleDeleteInteraction}
+        isLoading={isLoading}
+        onRefresh={loadInteractions}
       />
       <button
         onClick={toggleForm}

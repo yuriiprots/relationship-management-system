@@ -1,4 +1,4 @@
-import React from "react";
+import { capitalizeFirstLetter } from "../utils/capitalizeFirstLetter";
 
 export default function SortableHeader({ label, sortKey, sortConfig, onSort }) {
   return (
@@ -6,7 +6,7 @@ export default function SortableHeader({ label, sortKey, sortConfig, onSort }) {
       className="cursor-pointer border border-gray-300 p-2"
       onClick={() => onSort(sortKey)}
     >
-      {label}
+      {capitalizeFirstLetter(label)}
       {sortConfig.key === sortKey &&
         (sortConfig.direction === "asc" ? "↑" : "↓")}
     </th>
