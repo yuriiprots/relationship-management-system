@@ -1,6 +1,4 @@
-import React, { useEffect } from "react";
-import { Link, useNavigate } from "react-router-dom";
-import { useAuth } from "../contexts/authContext";
+import { useNavigate } from "react-router-dom";
 import { doSignOut } from "../firebase/auth";
 
 export default function Header() {
@@ -8,9 +6,7 @@ export default function Header() {
 
   const handleLogout = async () => {
     try {
-      console.log("Logging out...");
       await doSignOut();
-      console.log("User signed out successfully.");
       navigate("/login", { replace: true });
     } catch (error) {
       console.error("Error during logout:", error);
@@ -24,6 +20,7 @@ export default function Header() {
         <button
           onClick={handleLogout}
           className="rounded-md bg-blue-500 px-4 py-2 text-sm font-medium text-white shadow-md transition duration-300 ease-in-out hover:bg-blue-600"
+          aria-label="Logout"
         >
           Logout
         </button>

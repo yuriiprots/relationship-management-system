@@ -1,43 +1,29 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import FormInput from "./FormInput";
 
 export default function InteractionForm({
   onClose,
-  addInteraction,
+  createInteraction,
   editingInteraction,
   updateInteraction,
 }) {
-  const [formData, setFormData] = useState(
-    editingInteraction || {
-      date: new Date().toISOString().split("T")[0],
-      mood: "",
-      person: "",
-      emotion: "",
-      summary: "",
-    },
+  const initialData = useMemo(
+    () =>
+      editingInteraction || {
+        date: new Date().toISOString().split("T")[0],
+        mood: "",
+        person: "",
+        emotion: "",
+        summary: "",
+      },
+    [editingInteraction],
   );
 
-  useEffect(() => {
-    if (editingInteraction) setFormData(editingInteraction);
-  }, [editingInteraction]);
-
+  const [formData, setFormData] = useState(initialData);
   const [mouseDownInside, setMouseDownInside] = useState(false);
 
   const handleChange = (e) => {
-    const { name, value } = e.target;
-    setFormData({ ...formData, [name]: value });
-  };
-
-  const handleSubmit = (e) => {
-    e.preventDefault();
-
-    // const newFormData = {
-    //   ...formData,
-    //   id: Date.now().toString(),
-    // };
-
-    editingInteraction ? updateInteraction(formData) : addInteraction(formData);
-    onClose();
+    setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
   const handleMouseDown = (e) => {
@@ -48,6 +34,14 @@ export default function InteractionForm({
 
   const handleMouseUp = (e) => {
     if (!mouseDownInside && e.target.id === "wrapper") onClose();
+  };
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    editingInteraction
+      ? updateInteraction(formData)
+      : createInteraction(formData);
+    onClose();
   };
 
   return (
@@ -69,7 +63,9 @@ export default function InteractionForm({
           &times;
         </button>
 
-        <h1 className="text-lg font-bold">Interaction</h1>
+        <h1 className="text-center text-lg font-bold">
+          {editingInteraction ? "Edit interaction" : "New interaction"}
+        </h1>
 
         <FormInput
           type="date"
@@ -81,7 +77,7 @@ export default function InteractionForm({
         />
 
         <div className="flex flex-col">
-          <label>Mood:</label>
+          <label className="font-bold">Mood:</label>
 
           {["good", "neutral", "bad"].map((mood) => (
             <div key={mood} className="mb-2">
@@ -111,7 +107,7 @@ export default function InteractionForm({
         />
 
         <div className="flex flex-col">
-          <label>Emotion:</label>
+          <label className="font-bold">Emotion:</label>
           {["pleasantly", "unpleasantly"].map((emotion) => (
             <div key={emotion} className="mb-2">
               <input
@@ -131,7 +127,7 @@ export default function InteractionForm({
         </div>
 
         <div className="flex flex-col">
-          <label>Summary:</label>
+          <label className="font-bold">Summary:</label>
           <textarea
             className="my-2 rounded border border-gray-300 p-2"
             name="summary"

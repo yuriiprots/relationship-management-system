@@ -8,74 +8,11 @@ import {
   doc,
   updateDoc,
   deleteDoc,
+  query,
+  where,
 } from "firebase/firestore";
 
-// INTERACTIONS
-
-export const fetchInteractionsFromFirestore = async () => {
-  try {
-    const querySnapshot = await getDocs(collection(db, "interactions"));
-    return querySnapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
-  } catch (error) {
-    console.error("Error fetching interactions:", error);
-    throw error;
-
-    //   setInteractionsData(interactions);
-  }
-};
-
-export const addInteractionToFirestore = async (interactionToAdd) => {
-  try {
-    const docRef = await addDoc(
-      collection(db, "interactions"),
-      interactionToAdd,
-    );
-    return { id: docRef.id, ...interactionToAdd };
-  } catch (error) {
-    console.error("Error adding interaction:", error);
-    throw error;
-  }
-};
-
-export const updateInteractionInFirestore = async (interactionToEdit) => {
-  try {
-    const docRef = doc(db, "interactions", interactionToEdit.id);
-    await updateDoc(docRef, interactionToEdit);
-    return interactionToEdit;
-  } catch (error) {
-    console.error("Error updating interaction:", error);
-    throw error;
-  }
-};
-
-export const deleteInteractionInFirestore = async (interactionId) => {
-  try {
-    const docRef = doc(db, "interactions", interactionId);
-    await deleteDoc(docRef);
-  } catch (error) {
-    console.error("Error deleting interaction:", error);
-    throw error;
-  }
-};
-
 // USERS
-
-export const getUserFromFirestore = async (uid) => {
-  try {
-    const userRef = doc(db, "users", uid);
-    const userSnap = await getDoc(userRef);
-
-    if (userSnap.exists()) {
-      return userSnap.data();
-    } else {
-      console.log("User does not exist in Firestore.");
-      return null;
-    }
-  } catch (error) {
-    console.error("Error fetching user:", error);
-    throw error;
-  }
-};
 
 export const createUserInFirestore = async (user) => {
   try {
@@ -97,6 +34,91 @@ export const updateUserInFirestore = async (uid, userData) => {
     await updateDoc(userRef, userData);
   } catch (error) {
     console.error("Error updating user:", error);
+    throw error;
+  }
+};
+
+export const getUserFromFirestore = async (uid) => {
+  try {
+    const userRef = doc(db, "users", uid);
+    const userSnap = await getDoc(userRef);
+    if (userSnap.exists()) {
+      return userSnap.data();
+    } else {
+      console.log("User does not exist in Firestore.");
+      return null;
+    }
+  } catch (error) {
+    console.error("Error fetching user:", error);
+    throw error;
+  }
+};
+
+// INTERACTIONS
+
+export const fetchInteractionsFromFirestore = async (userId) => {
+  try {
+    const userQuery = query(
+      collection(db, "interactions"),
+      where("userId", "==", userId),
+    );
+    const querySnapshot = await getDocs(userQuery);
+    return querySnapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
+  } catch (error) {
+    console.error("Error fetching interactions:", error);
+    throw error;
+  }
+};
+
+export const addInteractionToFirestore = async (interactionToAdd) => {
+  try {
+    const docRef = await addDoc(collection(db, "interactions"), {
+      ...interactionToAdd,
+      createdAt: new Date(),
+    });
+    return { id: docRef.id, ...interactionToAdd };
+  } catch (error) {
+    console.error("Error adding interaction:", error);
+    throw error;
+  }
+};
+
+export const updateInteractionInFirestore = async (interactionToEdit) => {
+  try {
+    const docRef = doc(db, "interactions", interactionToEdit.id);
+    const docSnap = await getDoc(docRef);
+
+    if (
+      docSnap.exists() &&
+      docSnap.data().userId === interactionToEdit.userId
+    ) {
+      await updateDoc(docRef, interactionToEdit);
+      return interactionToEdit;
+    } else {
+      throw new Error(
+        "Unauthorized: You can only update your own interactions.",
+      );
+    }
+  } catch (error) {
+    console.error("Error updating interaction:", error);
+    throw error;
+  }
+};
+
+export const deleteInteractionInFirestore = async (userId, interactionId) => {
+  try {
+    const docRef = doc(db, "interactions", interactionId);
+    const docSnap = await getDoc(docRef);
+
+    if (docSnap.exists() && docSnap.data().userId === userId)
+      await deleteDoc(docRef);
+    else {
+      throw new Error(
+        "Unauthorized: You can only delete your own interactions.",
+      );
+    }
+  } catch (error) {
+    console.error("Error deleting interaction:", error);
     throw error;
   }
 };

@@ -17,7 +17,6 @@ export const doCreateUserWithEmailAndPassword = async (email, password) => {
     password,
   );
   const user = userCredential.user;
-  console.log(user);
   await createUserInFirestore(user);
   return userCredential;
 };

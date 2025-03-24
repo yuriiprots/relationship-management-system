@@ -1,47 +1,51 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { toast } from "react-toastify";
-import InteractionForm from "../components/InteractionForm";
-import InteractionTable from "../components/InteractionTable";
 import {
   fetchInteractionsFromFirestore,
   addInteractionToFirestore,
   updateInteractionInFirestore,
   deleteInteractionInFirestore,
 } from "../firebase/firestoreOperations";
+import InteractionForm from "../components/InteractionForm";
+import InteractionTable from "../components/InteractionTable";
+import { useAuth } from "../contexts/authContext";
 
-export default function Main() {
+export default function Interactions() {
+  const { currentUser } = useAuth();
   const [showForm, setShowForm] = useState(false);
   const [interactionsData, setInteractionsData] = useState([]);
   const [editingInteraction, setEditingInteraction] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
 
-  const loadInteractions = async () => {
+  const loadInteractions = useCallback(async () => {
+    if (!currentUser) return;
     setIsLoading(true);
     try {
-      const interactions = await fetchInteractionsFromFirestore();
+      const interactions = await fetchInteractionsFromFirestore(
+        currentUser.uid,
+      );
       setInteractionsData(interactions);
-      // toast.success("Interactions loaded successfully");
     } catch (error) {
-      toast.error(`Failed to load interactions: ${error}`);
+      toast.error(`Failed to load interactions: ${error.message}`);
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [currentUser]);
 
   useEffect(() => {
-    loadInteractions();
-  }, []);
+    if (currentUser) loadInteractions();
+  }, [currentUser, loadInteractions]);
 
-  // const addInteractionInLocalstorage = (newData) => {
-  //   const updatedData = [newData, ...interactionsData];
-  //   setInteractionsData(updatedData);
-  //   localStorage.setItem("interactionsData", JSON.stringify(updatedData));
-  // };
+  const handleCreateInteraction = async (interactionToAdd) => {
+    if (!currentUser) return;
+    console.log("Creating interaction:", interactionToAdd);
 
-  const handleAddInteraction = async (InteractionToAdd) => {
     try {
-      const addedInteraction =
-        await addInteractionToFirestore(InteractionToAdd);
+      const addedInteraction = await addInteractionToFirestore({
+        ...interactionToAdd,
+        userId: currentUser.uid,
+      });
+      console.log("Added interaction:", addedInteraction);
       setInteractionsData((prev) => [addedInteraction, ...prev]);
       toast.success("Interaction added successfully!");
     } catch (error) {
@@ -50,9 +54,12 @@ export default function Main() {
   };
 
   const handleUpdateInteraction = async (interactionToEdit) => {
+    if (!currentUser) return;
     try {
-      const updatedInteraction =
-        await updateInteractionInFirestore(interactionToEdit);
+      const updatedInteraction = await updateInteractionInFirestore({
+        ...interactionToEdit,
+        userId: currentUser.uid,
+      });
 
       setInteractionsData((prev) =>
         prev.map((interaction) =>
@@ -61,12 +68,6 @@ export default function Main() {
             : interaction,
         ),
       );
-
-      // const updatedInteraction = interactionsData.map((interaction) =>
-      //   interaction.id === editingInteraction.id
-      //     ? interactionToEdit
-      //     : interaction,
-      // );
       setEditingInteraction(null);
       toast.success("Interaction updated successfully!");
     } catch (error) {
@@ -81,38 +82,23 @@ export default function Main() {
 
   const handleDeleteInteraction = async (interactionToDeleteId) => {
     try {
-      await deleteInteractionInFirestore(interactionToDeleteId);
+      await deleteInteractionInFirestore(
+        currentUser.uid,
+        interactionToDeleteId,
+      );
       setInteractionsData((prev) =>
         prev.filter((interaction) => interaction.id !== interactionToDeleteId),
       );
       toast.success("Interaction deleted successfully!");
-      // const updatedData = interactionsData.filter(
-      //   (interaction) => interaction !== interactionToDelete,
-      // );
-      // setInteractionsData(updatedData);
-      // setEditingInteraction(null);
     } catch (error) {
       toast.error(`Failed to delete interaction: ${error}`);
     }
   };
 
-  // const updateInteractionInLocalstorage = (interactionToEdit) => {
-  //   const updatedData = interactionsData.map((interaction) =>
-  //     interaction === editingInteraction ? interactionToEdit : interaction,
-  //   );
-  //   setInteractionsData(updatedData);
-  //   localStorage.setItem("interactionsData", JSON.stringify(updatedData));
-  //   setEditingInteraction(null);
-  // };
-
-  // const deleteIneractionInLocalstorage = (interactionToDelete) => {
-  //   const updatedData = interactionsData.filter(
-  //     (interaction) => interaction !== interactionToDelete,
-  //   );
-  //   setInteractionsData(updatedData);
-  //   localStorage.setItem("interactionsData", JSON.stringify(updatedData));
-  //   setEditingInteraction(null);
-  // };
+  const handleShowFormForNewInteraction = () => {
+    setEditingInteraction(null);
+    setShowForm(true);
+  };
 
   const toggleForm = () => {
     setShowForm((prev) => !prev);
@@ -129,15 +115,15 @@ export default function Main() {
         onRefresh={loadInteractions}
       />
       <button
-        onClick={toggleForm}
+        onClick={handleShowFormForNewInteraction}
         className="mt-2 rounded bg-blue-500 p-2 text-white hover:bg-blue-600"
       >
-        Add interaction
+        Add new interaction
       </button>
       {showForm && (
         <InteractionForm
           onClose={toggleForm}
-          addInteraction={handleAddInteraction}
+          createInteraction={handleCreateInteraction}
           editingInteraction={editingInteraction}
           updateInteraction={handleUpdateInteraction}
         />

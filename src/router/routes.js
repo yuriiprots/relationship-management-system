@@ -6,13 +6,13 @@ import Settings from "../pages/Settings";
 import SignUp from "../pages/SignUp";
 
 export const privateRoutes = [
-  { path: "/dashboard", element: Dashboard },
-  { path: "/interactions", element: Interactions },
-  { path: "/people", element: People },
-  { path: "/settings", element: Settings },
+  { path: "/dashboard", component: Dashboard },
+  { path: "/interactions", component: Interactions },
+  { path: "/people", component: People },
+  { path: "/settings", component: Settings },
 ];
 
 export const publicRoutes = [
-  { path: "/login", element: Login },
-  { path: "/signup", element: SignUp },
+  { path: "/login", component: Login },
+  { path: "/signup", component: SignUp },
 ];

@@ -1,43 +1,23 @@
-import React, { useEffect } from "react";
-import { Navigate, Route, Routes, useNavigate } from "react-router-dom";
+import { Navigate, Route, Routes } from "react-router-dom";
 import { privateRoutes, publicRoutes } from "../router/routes";
 import { useAuth } from "../contexts/authContext";
 import AppLayout from "./AppLayout";
 
 export default function AppRouter() {
-  const navigate = useNavigate();
-  const { userLoggedIn, loading } = useAuth();
-
-  useEffect(() => {
-    console.log("AppRouter useEffect triggered!", { loading, userLoggedIn }); // 🔴 Перевірка виклику useEffect
-    if (!loading && !userLoggedIn) {
-      console.log("Redirecting to /login..."); // 🔴 Перевірка редиректу
-      navigate("/login", { replace: true });
-    }
-  }, [loading, userLoggedIn]);
-
-  if (loading) return null;
-
+  const {userLoggedIn} = useAuth();
+  
   return (
     <Routes>
       {userLoggedIn
-        ? privateRoutes.map((route) => (
+        ? privateRoutes.map(({ path, component: Component }) => (
             <Route
-              key={route.path}
-              path={route.path}
-              element={
-                <AppLayout>
-                  <route.element />
-                </AppLayout>
-              }
+              key={path}
+              path={path}
+              element={<AppLayout>{<Component />}</AppLayout>}
             />
           ))
-        : publicRoutes.map((route) => (
-            <Route
-              key={route.path}
-              path={route.path}
-              element={<route.element />}
-            />
+        : publicRoutes.map(({ path, component: Component }) => (
+            <Route key={path} path={path} element={<Component />} />
           ))}
       <Route
         path="*"

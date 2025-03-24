@@ -1,13 +1,13 @@
 import React from "react";
 
-const Loader = ({
+export default function Loader({
   size = "medium",
   color = "primary",
   type = "spinner",
   text = "Loading...",
   showText = true,
   fullScreen = false,
-}) => {
+}) {
   const sizeClasses = {
     small: "h-4 w-4",
     medium: "h-8 w-8",
@@ -103,6 +103,4 @@ const Loader = ({
       </div>
     </div>
   );
-};
-
-export default Loader;
+}
