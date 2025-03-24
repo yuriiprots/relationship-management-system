@@ -90,7 +90,7 @@ export default function SignUp() {
           </button>
 
           <p className="text-center text-sm">
-            Already have an account?
+            Already have an account?{" "}
             <Link to={"/login"} className="font-bold hover:underline">
               Continue
             </Link>
