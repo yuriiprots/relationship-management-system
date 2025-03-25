@@ -9,7 +9,7 @@ export default function App() {
     <>
       <AuthProvider>
         <ToastContainer position="top-center" autoClose={3000} />
-        <BrowserRouter>
+        <BrowserRouter basename={import.meta.env.BASE_URL}>
           <AppRouter />
         </BrowserRouter>
       </AuthProvider>
