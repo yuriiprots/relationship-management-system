@@ -195,7 +195,7 @@ export default function InteractionTable({
       </table>
       <Pagination
         currentPage={currentPage}
-        totalPages={totalPages}
+        totalPages={totalPages}  
         onPageChange={setCurrentPage}
       />
     </div>
